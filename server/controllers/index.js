@@ -11,7 +11,7 @@ module.exports = {
     post: function (req, res) {
       // a function which handles posting a message to the database
       // make sure the user is in the db
-      models.users.post(req.body.username)
+      models.users.post(req.body.username);
       // send js message object to db function
       models.messages.post(req.body)
         .then(results => {
@@ -19,18 +19,20 @@ module.exports = {
           res.send(201, req.body);
         })
         .catch(err => console.error(err));
-      });
     } 
   },
 
   users: {
     // Ditto as above
     get: function (req, res) {
-      // send res with json { results: [messages....] }      
+      models.users.get()
+        .then(results => res.send({results: results}))
+        .catch(err => console.error(err));// send res with json {}      
     },
     post: function (req, res) {
-      return models.users.post(username)
-        .then(results => res.send(201, results);
+      return models.users.post(req.body.username)
+        .then(results => res.send(201, results))
+        .catch(err => res.send(404, 'Username already taken'));
     }
   }
 };

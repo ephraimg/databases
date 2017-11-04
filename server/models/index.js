@@ -22,6 +22,7 @@ module.exports = {
     post: (username) => {
       return db.conn.queryAsync("insert into users set ?", {"username": username});
     }
+  }
 }; 
 
 // console.log('Attempting to get mysql messages...\n');
