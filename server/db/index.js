@@ -1,4 +1,7 @@
 var mysql = require('mysql');
+var Promise = require("bluebird");
+Promise.promisifyAll(require("mysql/lib/Connection").prototype);
+Promise.promisifyAll(require("mysql/lib/Pool").prototype);
 
 // Create a database connection and export it from this file.
 // You will need to connect with the user "root", no password,
@@ -11,17 +14,12 @@ var connection = mysql.createConnection({
   database : 'chat'
 });
 
-connection.connect(function(err) {
-  if (err) {
+connection.connectAsync()
+  .then(results => {
+    console.log('connected! ' + connection.threadId);
+  })
+  .catch(err => {
     console.error('error connecting: ' + err.stack);
-    return;
-  }
-  console.log('connected! ' + connection.threadId);
-});
-
-// connection.query('describe messages', function(error, results, fields) {
-//   if (error) { console.error(error); }
-//   console.log('The messages table looks like this:\n', results);
-// });
+  });
 
 exports.conn = connection;

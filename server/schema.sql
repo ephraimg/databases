@@ -17,6 +17,11 @@ CREATE TABLE `messages` (
   PRIMARY KEY (`id`)
 );
 
+CREATE TABLE `users` (
+  `id` INTEGER NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`)
+);
 
 /*  Execute this file from the command line by typing:
  *    mysql -u root < server/schema.sql

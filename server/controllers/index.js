@@ -2,24 +2,25 @@ var models = require('../models');
 
 module.exports = {
   messages: {
+    // a function which handles a get request for all messages
     get: function (req, res) {
-      // use db functions
-      models.messages.get(function(err, results, fields) {
-        if (err) { console.error(err); }
-        res.send({results: results});
-      });     
-    }, // a function which handles a get request for all messages
+      models.messages.get()
+        .then(results => res.send({results: results}))
+        .catch(err => console.error(err));   
+    }, 
     post: function (req, res) {
-      console.log('controller post: \n', req.body);
+      // a function which handles posting a message to the database
+      // make sure the user is in the db
+      models.users.post(req.body.username)
       // send js message object to db function
-      models.messages.post(req.body, function(err, results, fields) {
-        if (err) { console.error(err); }
-        // respond to client with 201
-        console.log('field --------------------------', fields);
-        req.body.insertId = results.insertId;
-        res.send(201, req.body);
+      models.messages.post(req.body)
+        .then(results => {
+          req.body.insertId = results.insertId;
+          res.send(201, req.body);
+        })
+        .catch(err => console.error(err));
       });
-    } // a function which handles posting a message to the database
+    } 
   },
 
   users: {
@@ -28,9 +29,8 @@ module.exports = {
       // send res with json { results: [messages....] }      
     },
     post: function (req, res) {
-      // parse the json
-      // send it to db function
-      // respond to client with 201
+      return models.users.post(username)
+        .then(results => res.send(201, results);
     }
   }
 };

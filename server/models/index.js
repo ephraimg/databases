@@ -2,24 +2,26 @@ var db = require('../db');
 
 module.exports = {
   messages: {
-    get: function (callback) {
-      db.conn.query('select * from `messages`', callback);
-    }, // a function which produces all the messages
-    post: function (message, callback) {
+    // a function which produces all the messages
+    get: () => db.conn.queryAsync('select * from `messages`'),
+    post: (message) => {
       var mysqlObj = {
         "text": message.text,
         "username": message.username,
         "roomname": message.roomname
       };
-      db.conn.query("insert into messages set ?", mysqlObj, callback);
-    } // a function which can be used to insert a message into the database
+      // a function which can be used to insert a message into the database
+      return db.conn.queryAsync("insert into messages set ?", mysqlObj);
+    }
   },
 
   users: {
-    // Ditto as above.
-    get: function () {},
-    post: function () {}
-  }
+    // a function which produces all the users
+    get: () => db.conn.queryAsync('select * from `users`'),
+    // a function which can be used to insert a message into the database
+    post: (username) => {
+      return db.conn.queryAsync("insert into users set ?", {"username": username});
+    }
 }; 
 
 // console.log('Attempting to get mysql messages...\n');
