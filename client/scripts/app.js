@@ -37,16 +37,18 @@ var app = {
 
   send: function(message) {
     app.startSpinner();
-
+    console.log('clientside SEND: ', message);
     // POST the message to the server
     $.ajax({
       url: app.server,
       type: 'POST',
-      data: JSON.stringify(message),
+      data: message,
+      contentType: "application/json",
+      dataType : "json",      
       success: function (data) {
         // Clear messages input
         app.$message.val('');
-
+      
         // Trigger a fetch to update the messages, pass true to animate
         app.fetch();
       },
@@ -198,6 +200,15 @@ var app = {
     if (selectIndex === 0) {
       var roomname = prompt('Enter room name');
       if (roomname) {
+
+        var welcome = {
+          'username': 'Chatterbox Bot',
+          'text': 'Welcome to ' + roomname + '!',
+          'roomname': roomname
+        };
+
+        app.send(JSON.stringify(welcome));
+
         // Set as the current room
         app.roomname = roomname;
 
@@ -222,8 +233,8 @@ var app = {
       'text': app.$message.val(),
       'roomname': app.roomname || 'lobby'
     };
-
-    app.send(message);
+    
+    app.send(JSON.stringify(message));
 
     // Stop the form from submitting
     event.preventDefault();
