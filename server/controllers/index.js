@@ -15,7 +15,9 @@ module.exports = {
       models.messages.post(req.body, function(err, results, fields) {
         if (err) { console.error(err); }
         // respond to client with 201
-        res.sendStatus(201);
+        console.log('field --------------------------', fields);
+        req.body.insertId = results.insertId;
+        res.send(201, req.body);
       });
     } // a function which handles posting a message to the database
   },
