@@ -17,10 +17,12 @@ describe('Persistent Node Chat Server', function() {
     dbConnection.connect();
 
     var tablename = 'messages'; // TODO: fill this out
+    var tablename2 = 'users';
 
     /* Empty the db table before each test so that multiple tests
      * (or repeated runs of the tests) won't screw each other up: */
-    dbConnection.query('truncate ' + tablename, done);
+    dbConnection.query('truncate ' + tablename, ()=>{});
+    dbConnection.query('truncate ' + tablename2, done);
   });
 
   afterEach(function() {
@@ -87,4 +89,56 @@ describe('Persistent Node Chat Server', function() {
       });
     });
   });
+
+  it('Should output all users from the DB', function(done) {
+    // Let's insert a user into the db
+    var randomUser = (Math.random() * 10000).toString();
+    var queryString = 'insert into users set ?';
+    var queryArgs = [{"username": randomUser}];
+    // TODO - The exact query string and query args to use
+    // here depend on the schema you design, so I'll leave
+    // them up to you. */
+
+    dbConnection.query(queryString, queryArgs, function(err) {
+      if (err) { throw err; }
+
+      // Now query the Node chat server and see if it returns
+      // the message we just inserted:
+      request('http://127.0.0.1:3000/classes/users', function(error, response, body) {
+        var messageLog = JSON.parse(body).results;
+        expect(messageLog[0].username).to.equal(randomUser);
+        done();
+      });
+    });
+  });
+
+  it('Should not have username duplicates', function(done) {
+    // Let's insert a user into the db
+    var randomUser = 'TestUserName';
+    var queryString = 'insert ignore into users set ?';
+    var queryArgs = [{"username": randomUser}];
+    // TODO - The exact query string and query args to use
+    // here depend on the schema you design, so I'll leave
+    // them up to you. */
+
+    dbConnection.query(queryString, queryArgs, function(err) {
+      if (err) { throw err; }
+      dbConnection.query(queryString, queryArgs, function(err2) { 
+        if (err2) { throw err2; }
+        // Now query the Node chat server and see if it returns
+        // the message we just inserted:
+        request('http://127.0.0.1:3000/classes/users', function(error, response, body) {
+          var messageLog = JSON.parse(body).results;
+          expect(messageLog.length).to.equal(1);
+          expect(messageLog[0].username).to.equal(randomUser);
+          done();
+        });
+      });
+    });
+  });
+
+
+
+
+
 });
