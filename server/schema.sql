@@ -4,24 +4,24 @@ USE chat;
 
 -- ---
 -- Table 'messages'
--- 
+--  
 -- ---
 
-DROP TABLE IF EXISTS `messages`;
+-- DROP TABLE IF EXISTS `messages`;
     
-CREATE TABLE `messages` (
-  `id` INTEGER NOT NULL AUTO_INCREMENT,
-  `text` VARCHAR(255) NOT NULL DEFAULT 'Hello!',
-  `username` VARCHAR(255) NOT NULL DEFAULT 'Anonymous',
-  `roomname` VARCHAR(255) NOT NULL DEFAULT 'lobby',
-  PRIMARY KEY (`id`)
-);
+-- CREATE TABLE `messages` (
+--   `id` INTEGER NOT NULL AUTO_INCREMENT,
+--   `text` VARCHAR(255) NOT NULL DEFAULT 'Hello!',
+--   `username` VARCHAR(255) NOT NULL DEFAULT 'Anonymous',
+--   `roomname` VARCHAR(255) NOT NULL DEFAULT 'lobby',
+--   PRIMARY KEY (`id`)
+-- );
 
-CREATE TABLE `users` (
-  `id` INTEGER NOT NULL AUTO_INCREMENT,
-  `username` VARCHAR(255) NOT NULL UNIQUE,
-  PRIMARY KEY (`id`)
-);
+-- CREATE TABLE `users` (
+--   `id` INTEGER NOT NULL AUTO_INCREMENT,
+--   `username` VARCHAR(255) NOT NULL UNIQUE,
+--   PRIMARY KEY (`id`)
+-- );
 
 /*  Execute this file from the command line by typing:
  *    mysql -u student < server/schema.sql
