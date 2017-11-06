@@ -8,18 +8,14 @@ module.exports = {
         .then(results => res.send({results: results}))
         .catch(err => console.error(err));   
     }, 
+    // a function which handles posting a message to the database
     post: function (req, res) {
-      // a function which handles posting a message to the database
       // make sure the user is in the db
-      console.log('controller message post req.body: ', req.body);
       models.users.post(req.body.username)
-        .then((results) => {
-          console.log('controller message post results: ', results);
-          // send js message object to db function
-          return models.messages.post(req.body);
-        })
+        // send message object to db function
+        .then(() => models.messages.post(req.body))
         .then(results => {
-          req.body.insertId = results.insertId;
+          // req.body.insertId = results.insertId;
           res.send(201, req.body);
         })
         .catch(err => res.send(404, 'Server: Unable to post.\nError: ', err));
@@ -33,12 +29,11 @@ module.exports = {
         .then(results => res.send({results: results}))
         .catch(err => console.error(err));// send res with json {}      
     },
+    // a function which handles posting a new user to the user database
     post: function (req, res) {
-      // a function which handles posting a new user to the user database
-      console.log('server users post req.body: ', req.body);
       return models.users.post(req.body.username)
         .then(results => res.send(201, results))
-        .catch(err => res.send(404, err));
+        .catch(err => res.send(404, 'Server: Unable to post.\nError: ', err));
     }
   }
 };

@@ -4,26 +4,26 @@ module.exports = {
   messages: {
     // a function which produces all the messages
     get: () => {
-      return db.Message.findAll();
-    },
+      return db.Messages.findAll()
+        .then(instances => instances.map(instance => instance.get({plain: true})))
+        .catch(err => console.error(err)); 
+    }, // a function which can be used to insert a message into the database
     post: (message) => {
-      // var mysqlObj = {
-      //   "text": message.text,
-      //   "username": message.username,
-      //   "roomname": message.roomname
-      // };
-      // a function which can be used to insert a message into the database
-      return db.Message.create(message);
+      console.log('Messages post attempt: ', message);
+      return db.Messages.create(message);
     }
   },
-
   users: {
     // a function which produces all the users
     get: () => {
-      return db.User.findAll();
-    }, // a function which can be used to insert a message into the database
+      return db.Users.findAll()
+        .then(instances => instances.map(instance => instance.get({plain: true})))
+        .catch(err => console.error(err)); 
+    }, // a function which can be used to insert a user into the database
     post: (username) => {
-      return db.User.create({username: username});
+      console.log('Users post attempt: ', username);      
+      return db.Users.findOrCreate({where: {username: username}})
+        .catch(err => console.error(err));
     }
   }
 }; 

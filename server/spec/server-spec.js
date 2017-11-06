@@ -10,8 +10,8 @@ describe('Persistent Node Chat Server', function() {
 
   beforeEach(function(done) {
     dbConnection = mysql.createConnection({
-      user: 'student',
-      password: 'student',
+      user: 'root',
+      password: '',
       database: 'chat'
     });
     dbConnection.connect();
@@ -21,7 +21,7 @@ describe('Persistent Node Chat Server', function() {
 
     /* Empty the db table before each test so that multiple tests
      * (or repeated runs of the tests) won't screw each other up: */
-    dbConnection.query('truncate ' + tablename, ()=>{});
+    dbConnection.query('truncate ' + tablename);
     dbConnection.query('truncate ' + tablename2, done);
   });
 
@@ -46,28 +46,47 @@ describe('Persistent Node Chat Server', function() {
           roomname: 'Hello'
         }
       }, function (err, response, body) {
-        // Now if we look in the database, we should find the
-        // posted message there.
-
+        // Now the message should be in the database.
         // TODO: You might have to change this test to get all the data from
         // your message table, since this is schema-dependent.
-        var queryString = 'SELECT * FROM Messages WHERE id = ?';
-        var queryArgs = [body.insertId];
-
-        dbConnection.query(queryString, queryArgs, function(err, results) {
+        var queryString = 'SELECT * FROM Messages';
+        dbConnection.query(queryString, [], function(err, results) {
           // Should have one result:
           expect(results.length).to.equal(1);
-
           // TODO: If you don't have a column named text, change this test.
           expect(results[0].text).to.equal('In mercy\'s name, three days is all I need.');
-
           done();
         });
       });
     });
   });
 
-  it('Should output all messages from the DB', function(done) {
+  it('Should not allow username duplicates', function(done) {
+    // Let's insert a user into the db
+    var queryString = 'insert ignore into users set ?';
+    var queryArgs = [{"username": 'testUser'}];
+    // TODO - The exact query string and query args to use
+    // here depend on the schema you design, so I'll leave
+    // them up to you. */
+
+    dbConnection.query(queryString, queryArgs, function(err) {
+      if (err) { throw err; }
+      dbConnection.query(queryString, queryArgs, function(err2) { 
+        if (err2) { throw err2; }
+        // Now query the Node chat server and see if it returns
+        // the message we just inserted:
+        dbConnection.query('select * from users where username = "testUser"', [], function(err, results) {
+          // Should have one result:
+          expect(results.length).to.equal(1);
+          // TODO: If you don't have a column named text, change this test.
+          expect(results[0].username).to.equal('testUser');
+          done();
+        });
+      });
+    });
+  });
+
+  it('Should provide the client all messages from the DB', function(done) {
     // Let's insert a message into the db
     var queryString = 'INSERT INTO messages (username, text, roomname)\
       values ("Valjean", "Men like you can never change!", "main")';
@@ -90,11 +109,11 @@ describe('Persistent Node Chat Server', function() {
     });
   });
 
-  it('Should output all users from the DB', function(done) {
+  it('Should provide the client all users from the DB', function(done) {
     // Let's insert a user into the db
-    var randomUser = (Math.random() * 10000).toString();
+    var randomUser = 'testUser';
     var queryString = 'insert into users set ?';
-    var queryArgs = [{"username": randomUser}];
+    var queryArgs = [{'username': 'testUser'}];
     // TODO - The exact query string and query args to use
     // here depend on the schema you design, so I'll leave
     // them up to you. */
@@ -106,39 +125,13 @@ describe('Persistent Node Chat Server', function() {
       // the message we just inserted:
       request('http://127.0.0.1:3000/classes/users', function(error, response, body) {
         var messageLog = JSON.parse(body).results;
+        
+        // Why do I need this line?? Messages gets cleared out automatically, but not Users...
+        dbConnection.query('delete from users where username = "testUser"', [], ()=>{});
         expect(messageLog[0].username).to.equal(randomUser);
         done();
       });
     });
   });
-
-  it('Should not have username duplicates', function(done) {
-    // Let's insert a user into the db
-    var randomUser = 'TestUserName';
-    var queryString = 'insert ignore into users set ?';
-    var queryArgs = [{"username": randomUser}];
-    // TODO - The exact query string and query args to use
-    // here depend on the schema you design, so I'll leave
-    // them up to you. */
-
-    dbConnection.query(queryString, queryArgs, function(err) {
-      if (err) { throw err; }
-      dbConnection.query(queryString, queryArgs, function(err2) { 
-        if (err2) { throw err2; }
-        // Now query the Node chat server and see if it returns
-        // the message we just inserted:
-        request('http://127.0.0.1:3000/classes/users', function(error, response, body) {
-          var messageLog = JSON.parse(body).results;
-          expect(messageLog.length).to.equal(1);
-          expect(messageLog[0].username).to.equal(randomUser);
-          done();
-        });
-      });
-    });
-  });
-
-
-
-
 
 });

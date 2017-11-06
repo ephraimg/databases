@@ -1,98 +1,76 @@
 var Sequelize = require('sequelize');
-var db = new Sequelize('chat', 'student', 'student');
+var db = new Sequelize('chat', 'root', '');
 
-var User = db.define('User', {
+var Users = db.define('Users', {
   username: {
     type: Sequelize.STRING,
     allowNull: false,
     unique: true
+  },
+  // Default values below are needed to pass tests.
+  createdAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.literal('NOW()')
+  },
+  updatedAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.literal('NOW()')
   }
-});
+}); 
 
-var Message = db.define('Message', {
+var Messages = db.define('Messages', {
   username: Sequelize.STRING,
   text: Sequelize.STRING,
-  roomname: Sequelize.STRING
+  roomname: Sequelize.STRING,
+  // Default values below are needed to pass tests.  
+  createdAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.literal('NOW()')
+  },
+  updatedAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.literal('NOW()')
+  }  
 });
 
-User.sync()
-  .then(function() {
-    // Now instantiate an object and save it:
-    return User.create({username: 'Jean Valjean'});
-    return sequelize.query("insert ignore into users set ?", { replacements: [{"username": username}], type: sequelize.QueryTypes.SELECT });
-  })
-  .then(function() {
-    // Retrieve objects from the database:
-    return User.findAll({ where: {username: 'Jean Valjean'} });
-  })
+Users.sync()
+  // Now instantiate an object and save it:
+  .then(() => Users.findOrCreate({username: 'Chatterbot'}))
+  // Retrieve objects from the database:
+  .then(() => Users.findAll())
+  // Log all existing users (don't forget, this return *instances*)
   .then(function(users) {
+    console.log(`----------------------\n Initialized the Users table...`);
     users.forEach(function(user) {
-      console.log(user.username + ' exists');
+      console.log('Username "' + user.username + '" exists');
     });
-    // db.close();
   })
-  .catch(function(err) {
-    // Handle any error in the chain
-    console.error(err);
-    // db.close();
-  });
+  // Handle any error in the chain
+  .catch(err => console.error(err));
 
-Message.sync()
+Messages.sync()
   .then(function() {
-    return Message.create({
-      username: 'Fred',
-      text: 'Hello, everyone!',
+    // Insert an initial message or the client will break!
+    return Messages.findOrCreate({where: {
+      username: 'Chatterbot',
+      text: 'Welcome to Chatterbox!',
       roomname: 'lobby'
-    }); 
-  })
-  .then(function() {
-    // Retrieve objects from the database:
-    return Message.findAll();
-  })
+    }}); 
+  }) 
+  // Retrieve objects from the database:
+  .then(() => Messages.findAll())
   .then(function(messages) {
-    var newmessages = messages.map(message => {
-      return message.get({plain:true});
+    var newMessages = messages.map(message => {
+      return message.get({plain: true});
     });
-    newmessages.forEach(function(message) {
-      // return message.get({plain:true});
-      console.log('A message was posted: ', message);
+    console.log(`----------------------\n Initialized the Messages table...`);
+    newMessages.forEach(function(message) {
+      console.log('A message was posted: \n', message);
     });
-    // db.close();
   })
-  .catch(function(err) {
-    // Handle any error in the chain
-    console.error(err);
-    // db.close();
-  }); 
+  .catch(err => console.error(err));
+ 
 
 module.exports.db = db;
-module.exports.User = User;
-module.exports.Message = Message;
-
-/*    // PURE SQL CODE
-var mysql = require('mysql');
-var Promise = require("bluebird");
-Promise.promisifyAll(require("mysql/lib/Connection").prototype);
-Promise.promisifyAll(require("mysql/lib/Pool").prototype);
-
-// Create a database connection and export it from this file.
-// You will need to connect with the user "root", no password,
-// and to the database "chat".
-
-var connection = mysql.createConnection({
-  host : 'localhost',
-  user : 'student',
-  password : 'student',
-  database : 'chat'
-});
-
-connection.connectAsync()
-  .then(results => {
-    console.log('connected! ' + connection.threadId);
-  })
-  .catch(err => {
-    console.error('error connecting: ' + err.stack);
-  });
-
-exports.conn = connection;
-*/
+module.exports.Users = Users;
+module.exports.Messages = Messages;

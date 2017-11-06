@@ -25,5 +25,9 @@ USE chat;
 
 /*  Execute this file from the command line by typing:
  *    mysql -u student < server/schema.sql
- *  to create the database and the tables.*/
+ *  to create the database and the tables.
+
+( First must run mysql.server start, mysql -u root -p )
+
+ */
 
